@@ -6,6 +6,12 @@ import os
 import mysql.connector
 import logging
 
+def filter_datum(fields, redaction, message, separator):
+    '''
+    '''
+    regex_pattern = f'({re.escape(separator)}|^)({"|".join(map(re.escape, fields))})=([^{re.escape(separator)}]*)'
+    return re.sub(regex_pattern, f'\\1\\2={redaction}', message)
+
 class RedactingFormatter(logging.Formatter):
     """Redacting Formatter class"""
 
