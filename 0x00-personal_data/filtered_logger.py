@@ -6,11 +6,16 @@ import os
 import mysql.connector
 import logging
 
-def filter_datum(fields, redaction, message, separator):
-    '''
-    '''
-    regex_pattern = f'({re.escape(separator)}|^)({"|".join(map(re.escape, fields))})=([^{re.escape(separator)}]*)'
-    return re.sub(regex_pattern, f'\\1\\2={redaction}', message)
+PII_FIELDS = ("name", "email", "phone", "ssn", "password")
+
+
+def filter_datum(fields: List[str], redaction: str,
+                 message: str, separator: str) -> str:
+    """ Returns a log message obfuscated """
+    for f in fields:
+        message = re.sub(f'{f}=.*?{separator}',
+                         f'{f}={redaction}{separator}', message)
+    return message
 
 class RedactingFormatter(logging.Formatter):
     """Redacting Formatter class"""
@@ -56,7 +61,6 @@ def get_db():
     
     return db_connection
 
-FILTERED_FIELDS = ['name', 'email', 'phone', 'ssn', 'password']
 
 def main():
     db_connection = get_db()
